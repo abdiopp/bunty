@@ -1,0 +1,45 @@
+# Builds and tests Bunty on a real Windows machine, and attaches the installer to the run.
+# Push to GitHub (or start it from the Actions tab) to get a tested Bunty-Setup-x.y.z.exe.
+name: Windows build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # .npmrc turns off install scripts, so this needs no compiler or Python.
+      - run: npm ci
+
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+
+      # The end-to-end tests drive the real app, including its windows and tray.
+      - run: npm run test:e2e
+
+      - run: npx electron-builder --win --x64 --publish never
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Bunty-installer
+          path: dist/Bunty-Setup-*.exe
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-results
+          path: test-results/

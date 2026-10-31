@@ -1,0 +1,65 @@
+appId: com.bunty.app
+productName: Bunty
+copyright: Copyright © 2026 Bunty
+directories:
+  output: dist
+  buildResources: build
+
+# Pages, preload and main are bundled into out/ by electron-vite; only the main process's three
+# runtime packages ship as node_modules.
+files:
+  - out/**
+  - package.json
+  - '!**/*.map'
+  - '!node_modules/better-sqlite3/{src,deps,build,benchmark,docs,test}/**'
+  - '!node_modules/chrono-node/{src,dist/esm}/**'
+
+# Tray and notification icons need real files on disk, not paths inside app.asar.
+extraResources:
+  - from: resources
+    to: resources
+
+asar: true
+asarUnpack:
+  - '**/*.node'
+
+# better-sqlite3 ships Node-API prebuilds for every platform, so nothing is compiled.
+npmRebuild: false
+
+# Turn off what an attacker with local access could use to run code through the app.
+electronFuses:
+  runAsNode: false
+  enableNodeOptionsEnvironmentVariable: false
+  enableNodeCliInspectArguments: false
+  enableCookieEncryption: true
+  enableEmbeddedAsarIntegrityValidation: true
+  onlyLoadAppFromAsar: true
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: build/icon.ico
+  executableName: Bunty
+  # Only the Windows build of SQLite goes in the Windows installer.
+  files:
+    - '!node_modules/better-sqlite3/prebuilds/{darwin,linux,linuxmusl}-*.node'
+    - '!node_modules/better-sqlite3/prebuilds/win32-arm64.node'
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Bunty
+  uninstallDisplayName: Bunty
+  artifactName: Bunty-Setup-${version}.${ext}
+  # Uninstalling keeps your tasks; reinstalling picks them up again.
+  deleteAppDataOnUninstall: false
+
+# For local testing of the packaged app on a Mac (npm run build:dir).
+mac:
+  target: dir
+  icon: build/icon.png
+  category: public.app-category.productivity
