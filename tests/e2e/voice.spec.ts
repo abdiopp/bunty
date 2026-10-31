@@ -18,9 +18,6 @@ let userData: string
 let app: ElectronApplication
 let page: Page
 
-// The stand-in for whisper.cpp is a shell script.
-test.skip(process.platform === 'win32', 'The fake whisper.cpp is a shell script')
-
 test.beforeEach(async () => {
   userData = mkdtempSync(join(tmpdir(), 'bunty-voice-e2e-'))
   app = await electron.launch({
@@ -45,6 +42,9 @@ test.afterEach(async () => {
 })
 
 test('speak, check the card, save: the whole path from microphone to task', async () => {
+  // The stand-in for whisper.cpp is a shell script.
+  test.skip(process.platform === 'win32', 'The fake whisper.cpp is a shell script')
+
   // Set up the way a user would: pick the program and model in Settings. Any readable file
   // will do as the stand-in's model.
   await page.getByRole('button', { name: 'Settings' }).click()

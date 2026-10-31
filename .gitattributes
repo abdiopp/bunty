@@ -1,0 +1,8 @@
+# LF everywhere, including Windows checkouts, so Prettier sees the files as they're written.
+* text=auto eol=lf
+
+*.png binary
+*.ico binary
+*.icns binary
+*.pdf binary
+*.woff2 binary
